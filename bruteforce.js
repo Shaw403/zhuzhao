@@ -40,7 +40,7 @@
       this.total = 0;
       this.alive = 0;
       this.dead = 0;
-      this.tesseractWorker = null;
+
       this.captchaSelector = null;
     }
 
@@ -560,30 +560,10 @@
       });
     }
 
-    // --- OCR 验证码识别 ---
-    async initOCR() {
-      if (this.tesseractWorker) return;
-      if (typeof Tesseract === "undefined") {
-        throw new Error("Tesseract.js 未加载");
-      }
-      this.showToast("正在初始化 OCR 引擎...");
-      const extUrl = (path) => chrome.runtime.getURL(path);
-      this.tesseractWorker = await Tesseract.createWorker("eng", 1, {
-        workerPath: extUrl("lib/tesseract-worker.min.js"),
-        corePath: extUrl("lib/tesseract-core-simd.wasm.js"),
-        langPath: extUrl("lib"),
-        logger: (m) => {
-          if (m.status === "recognizing text") {
-            const pct = Math.round((m.progress || 0) * 100);
-            this.showToast(`OCR 识别中... ${pct}%`);
-          }
-        },
-      });
-    }
-
-    // 图片预处理：灰度化 + 二值化，提高验证码识别率
-    preprocessImage(base64) {
-      return new Promise((resolve) => {
+    // --- OCR 验证码识别（通过ddddocr本地服务） ---
+    async recognizeCaptcha(base64) {
+      // 图片预处理：灰度化 + 二值化，提高验证码识别率
+      const processed = await new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -593,7 +573,6 @@
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const data = imageData.data;
-          // 灰度化 + 二值化
           for (let i = 0; i < data.length; i += 4) {
             const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
             const val = gray > 140 ? 255 : 0;
@@ -602,17 +581,18 @@
           ctx.putImageData(imageData, 0, 0);
           resolve(canvas.toDataURL("image/png"));
         };
-        img.onerror = () => resolve(base64); // 预处理失败则用原图
+        img.onerror = () => resolve(base64);
         img.src = base64;
       });
-    }
-
-    async recognizeCaptcha(base64) {
-      await this.initOCR();
-      const processed = await this.preprocessImage(base64);
-      const { data: { text } } = await this.tesseractWorker.recognize(processed);
-      // 清理识别结果：只保留字母数字
-      return text.trim().replace(/[^a-zA-Z0-9]/g, "");
+      // 调用ddddocr服务识别
+      const resp = await fetch("http://127.0.0.1:19876/ocr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: processed }),
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      return (data.text || "").trim().replace(/[^a-zA-Z0-9]/g, "");
     }
   }
 

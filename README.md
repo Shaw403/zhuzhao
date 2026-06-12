@@ -65,7 +65,7 @@
 
 - **CSRF Token 自动提取** - 识别页面中 CSRF 隐藏字段，每次请求前自动刷新
 - **JS 加密绕过** - 通过 Content Script 注入，直接调用页面的加密函数完成密码加密后再提交，绕过前端 JS 加密保护
-- **验证码自动识别** - 集成 Tesseract OCR + ddddocr 双引擎，自动识别图形验证码
+- **验证码自动识别** - 集成 ddddocr OCR 引擎，自动识别图形验证码
 - **登录状态智能判断** - 基于 Token 变化、页面跳转、关键词匹配（支持中英文）综合判断成功/失败
 - **自定义弱口令字典** - 内置弱口令库，支持按年份范围、企业后缀等维度生成定向字典
 - **多并发请求** - 可配置并发数和请求间隔，平衡速度与稳定性
@@ -111,28 +111,14 @@ npm run build
 
 ## 🔧 验证码识别（可选）
 
-爆破模块的验证码识别支持两种方式：
-
-### 方式一：ddddocr 本地服务（推荐）
+爆破模块的验证码识别依赖 ddddocr 本地服务：
 
 ```bash
 pip3 install ddddocr
 python3 captcha_server.py
 ```
 
-服务默认监听 `http://127.0.0.1:19876`。
-
-### 方式二：Tesseract OCR
-
-需要手动下载英文训练数据：
-
-```bash
-# 下载 eng.traineddata 放入 lib/ 目录
-curl -L -o lib/eng.traineddata \
-  https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
-```
-
-> `lib/eng.traineddata`（约 23MB）未包含在仓库中，需自行下载。
+服务默认监听 `http://127.0.0.1:19876`，仅在爆破含验证码的登录页面时需要。
 
 ## 📁 项目结构
 
@@ -153,7 +139,6 @@ curl -L -o lib/eng.traineddata \
 │   ├── content/               # 内容脚本（DOM扫描、JS提取）
 │   ├── popup/                 # 弹窗 UI 逻辑
 │   └── utils/                 # 工具函数
-└── lib/                       # Tesseract OCR 引擎
 ```
 
 ## 🙏 致谢

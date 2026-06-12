@@ -20,8 +20,7 @@
     "tabs",
     "webNavigation",
     "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
-    "offscreen"
+    "declarativeNetRequestWithHostAccess"
   ],
 
   "host_permissions": [
@@ -61,9 +60,7 @@
     "finger.json",
     "finger24-headers.json",
     "custom-fingerprints.json",
-    "active-fingerprints.json",
-    "lib/*",
-    "ocr.html"
+    "active-fingerprints.json"
   ],
   "matches": ["*://*/*"]
 }],

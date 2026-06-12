@@ -20,40 +20,24 @@ chrome.runtime.onMessage.addListener((i,e,t)=>{if(i.to&&i.to!=="background"||i.t
 chrome.runtime.onMessage.addListener((i,e,t)=>{if(i.to&&i.to!=="background"||i.type!=="URL_ALIVE_CHECK")return!1;(async()=>{const url=i.url;if(!url){t({status:0,size:0,error:"No URL"});return}const ctrl=new AbortController();const tid=setTimeout(()=>ctrl.abort(),8e3);try{const resp=await fetch(url,{method:"GET",signal:ctrl.signal,credentials:"omit"});clearTimeout(tid);const buf=await resp.arrayBuffer();t({status:resp.status,size:buf.byteLength,error:null})}catch(r){clearTimeout(tid);t({status:0,size:0,error:r.name==="AbortError"?"Timeout":r.message||"Fetch failed"})}})();return!0});
 // LOGIN_BRUTE_ATTEMPT: 转发到content script的LOGIN_SUBMIT（前端模拟登录）
 chrome.runtime.onMessage.addListener((i,e,t)=>{if(i.to&&i.to!=="background"||i.type!=="LOGIN_BRUTE_ATTEMPT")return!1;chrome.windows.getLastFocused({populate:!0},function(win){var tab=win&&win.tabs&&win.tabs.find(function(t){return t.active});if(!tab||!tab.id){t({success:null,message:"无标签页ID"});return}chrome.tabs.sendMessage(tab.id,{type:"LOGIN_SUBMIT",formInfo:i.formInfo,credential:i.credential},{frameId:0},function(r){if(chrome.runtime.lastError||!r){t({success:null,message:"content script未响应"})}else{t(r)}})});return!0});
-// OCR: 通过offscreen document进行验证码识别
-var _ocrCallbacks={};
-var _ocrId=0;
-var _ocrReady=false;
-// 接收offscreen的OCR结果
+// OCR: 通过ddddocr本地服务进行验证码识别
 chrome.runtime.onMessage.addListener(function(msg,sender,sendResponse){
-  if(msg.type==="OCR_RESULT"&&msg.ocrId){
-    var cb=_ocrCallbacks[msg.ocrId];
-    if(cb){cb(msg);delete _ocrCallbacks[msg.ocrId]}
-    return false;
-  }
   if(msg.type!=="CAPTCHA_OCR")return false;
-  var ocrId=++_ocrId;
-  var responded=false;
-  // 注册回调
-  _ocrCallbacks[ocrId]=function(resp){
-    if(responded)return;responded=true;
-    sendResponse(resp);
-  };
-  // 发送到offscreen
-  var sendToOffscreen=function(){
-    chrome.runtime.sendMessage({type:"OCR_RECOGNIZE",imageBase64:msg.imageBase64,ocrId:ocrId});
-  };
-  if(_ocrReady){sendToOffscreen()}
-  else{
-    chrome.offscreen.createDocument({url:"ocr.html",reasons:["DOM_PARSER"],justification:"OCR captcha"})
-      .then(function(){_ocrReady=true;setTimeout(sendToOffscreen,500)})
-      .catch(function(e){
-        if(e.message&&e.message.includes("already exists")){_ocrReady=true;sendToOffscreen()}
-        else{if(!responded){responded=true;sendResponse({text:"",error:e.message})}}
-      });
-  }
-  // 超时保护
-  setTimeout(function(){if(!responded){responded=true;sendResponse({text:"",error:"OCR超时"});delete _ocrCallbacks[ocrId]}},20000);
+  var base64=msg.imageBase64||"";
+  if(base64.indexOf(",")!==-1) base64=base64.split(",")[1];
+  var ctrl=new AbortController();
+  var tid=setTimeout(function(){ctrl.abort()},10000);
+  fetch("http://127.0.0.1:19876/ocr",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({image:"data:image/png;base64,"+base64}),
+    signal:ctrl.signal
+  }).then(function(r){clearTimeout(tid);return r.json()}).then(function(d){
+    sendResponse({text:(d.text||"").trim().replace(/[^a-zA-Z0-9]/g,"")});
+  }).catch(function(e){
+    clearTimeout(tid);
+    sendResponse({text:"",error:e.name==="AbortError"?"OCR服务请求超时":e.message||"OCR服务不可用"});
+  });
   return true;
 });
 
