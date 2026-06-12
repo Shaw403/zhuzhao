@@ -1,0 +1,716 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+      <div class="nav-left">
+        <img src="logo.png" class="nav-logo" alt="烛照" />
+        <button class="nav-tab active" data-page="scanner">信息搜集</button>
+        <button class="nav-tab" data-page="fingerprint">指纹嗅探</button>
+        <button class="nav-tab" data-page="threatintel">威胁情报</button>
+        <button class="nav-tab" data-page="encoder">编解码</button>
+        <button class="nav-tab" data-page="weakpass">弱口令</button>
+        <button class="nav-tab" data-page="urltools">URL工具</button>
+        <button class="nav-tab" data-page="config">配置</button>
+        <button class="progress-tab">0%</button>
+      </div>
+    </div>
+    <div class="frame-nav-bar" style="display: none">
+      <div class="frame-nav-left">
+        <!-- frame按钮将由JS动态添加 -->
+      </div>
+    </div>
+    <!-- 扫描页面 -->
+    <div class="page scanner-page active">
+      <div class="container"></div>
+    </div>
+
+    <!-- 指纹嗅探页面 -->
+    <div class="page fingerprint-page">
+      <div class="container">
+        <div class="fingerprint-toolbar">
+          <button id="triggerActiveScan" class="active-scan-btn">
+            主动探测
+          </button>
+          <span id="activeScanStatus" class="active-scan-status"></span>
+        </div>
+        <div class="fingerprint-section">
+          <!-- 指纹组将由 JS 动态添加 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 威胁情报页面 -->
+    <div class="page threatintel-page">
+      <div class="container">
+        <div class="ti-section">
+          <div class="ti-query-panel">
+            <div class="ti-query-row">
+              <textarea
+                id="tiResource"
+                class="ti-input ti-textarea"
+                placeholder="输入 IP / 域名 / 文件哈希，支持批量（每行一个或逗号分隔）&#10;Ctrl+Enter 快捷查询"
+                rows="3"
+              ></textarea>
+              <div class="ti-btn-col">
+                <button id="tiQuery" class="ti-primary-btn" type="button">查询</button>
+                <button id="tiClearInput" class="ti-secondary-btn" type="button">清空</button>
+              </div>
+            </div>
+            <div id="tiBatchInfo" class="ti-batch-info" style="display:none;">
+              <span id="tiBatchCount">0</span> 条目标 ·
+              <span id="tiBatchType"></span>
+            </div>
+            <label class="ti-toggle">
+              <input type="checkbox" id="tiRealtimeVerdict" />
+              <span>仅返回当前有效情报</span>
+            </label>
+            <div class="ti-platforms" aria-label="威胁情报平台">
+              <label class="ti-toggle">
+                <input type="checkbox" id="tiPlatformThreatbook" />
+                <span>微步</span>
+              </label>
+              <label class="ti-toggle">
+                <input type="checkbox" id="tiPlatformVirustotal" />
+                <span>VirusTotal</span>
+              </label>
+              <label class="ti-toggle">
+                <input type="checkbox" id="tiPlatformIcp" />
+                <span>备案查询</span>
+              </label>
+              <label class="ti-toggle">
+                <input type="checkbox" id="tiPlatformIpgeo" />
+                <span>IP归属</span>
+              </label>
+            </div>
+            <div id="tiStatus" class="ti-status">当前接入：微步 / VirusTotal / 备案查询 / IP归属<button id="tiClearCache" class="ti-clear-cache" type="button">清除缓存</button></div>
+          </div>
+          <div id="tiResults" class="ti-results">
+            输入 IP / 域名 / 文件哈希后查询第三方威胁情报
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编解码页面 -->
+    <div class="page encoder-page">
+      <div class="container">
+        <div class="encoder-section">
+          <div class="encoder-input-group">
+            <textarea
+              id="encoderInput"
+              class="encoder-textarea"
+              placeholder="输入待编解码的内容...&#10;支持自动识别: JWT / URL编码 / Base64 / Unicode / HTML实体 / Hex"
+            ></textarea>
+          </div>
+          <div id="encoderDetect" class="encoder-detect" style="display: none">
+            <span class="encoder-detect-icon">🔍</span>
+            <span id="encoderDetectText"></span>
+            <button
+              id="encoderDetectAction"
+              class="encoder-detect-btn"
+            ></button>
+          </div>
+          <div class="encoder-btn-group">
+            <div class="encoder-btn-label">编码</div>
+            <div class="encoder-btn-row">
+              <button
+                class="encoder-btn encode-btn"
+                data-action="base64-encode"
+              >
+                Base64
+              </button>
+              <button class="encoder-btn encode-btn" data-action="url-encode">
+                URL
+              </button>
+              <button
+                class="encoder-btn encode-btn"
+                data-action="double-url-encode"
+              >
+                双重URL
+              </button>
+              <button
+                class="encoder-btn encode-btn"
+                data-action="unicode-encode"
+              >
+                Unicode
+              </button>
+            </div>
+            <div class="encoder-btn-row">
+              <button class="encoder-btn encode-btn" data-action="html-encode">
+                HTML实体
+              </button>
+              <button class="encoder-btn encode-btn" data-action="hex-encode">
+                Hex
+              </button>
+              <button class="encoder-btn encode-btn" data-action="js-encode">
+                JS转义
+              </button>
+            </div>
+            <div class="encoder-btn-label">解码</div>
+            <div class="encoder-btn-row">
+              <button
+                class="encoder-btn decode-btn"
+                data-action="base64-decode"
+              >
+                Base64
+              </button>
+              <button class="encoder-btn decode-btn" data-action="url-decode">
+                URL
+              </button>
+              <button
+                class="encoder-btn decode-btn"
+                data-action="double-url-decode"
+              >
+                双重URL
+              </button>
+              <button
+                class="encoder-btn decode-btn"
+                data-action="unicode-decode"
+              >
+                Unicode
+              </button>
+            </div>
+            <div class="encoder-btn-row">
+              <button class="encoder-btn decode-btn" data-action="html-decode">
+                HTML实体
+              </button>
+              <button class="encoder-btn decode-btn" data-action="hex-decode">
+                Hex
+              </button>
+              <button class="encoder-btn decode-btn" data-action="js-decode">
+                JS反转义
+              </button>
+              <button class="encoder-btn decode-btn" data-action="jwt-decode">
+                JWT解析
+              </button>
+            </div>
+            <div class="encoder-btn-label">哈希</div>
+            <div class="encoder-btn-row">
+              <button class="encoder-btn hash-btn" data-action="md5">
+                MD5
+              </button>
+              <button class="encoder-btn hash-btn" data-action="sha1">
+                SHA1
+              </button>
+              <button class="encoder-btn hash-btn" data-action="sha256">
+                SHA256
+              </button>
+              <button class="encoder-btn hash-btn" data-action="sm3">
+                SM3
+              </button>
+            </div>
+            <div class="encoder-btn-label">加密解密</div>
+            <div class="encoder-crypto-inputs">
+              <input
+                type="text"
+                id="cryptoKey"
+                class="encoder-crypto-input"
+                placeholder="密钥 (文本)"
+              />
+              <input
+                type="text"
+                id="cryptoIv"
+                class="encoder-crypto-input"
+                placeholder="IV (ECB留空)"
+              />
+            </div>
+            <div class="encoder-crypto-inputs">
+              <select id="cryptoMode" class="encoder-crypto-select">
+                <option value="aes-128-cbc">AES-128-CBC</option>
+                <option value="aes-192-cbc">AES-192-CBC</option>
+                <option value="aes-256-cbc">AES-256-CBC</option>
+                <option value="aes-128-ecb">AES-128-ECB</option>
+                <option value="aes-192-ecb">AES-192-ECB</option>
+                <option value="aes-256-ecb">AES-256-ECB</option>
+                <option value="aes-128-gcm">AES-128-GCM</option>
+                <option value="aes-256-gcm">AES-256-GCM</option>
+              </select>
+              <select id="cryptoPadding" class="encoder-crypto-select">
+                <option value="pkcs7">PKCS7填充</option>
+                <option value="nopadding">无填充</option>
+                <option value="zero">Zero填充</option>
+              </select>
+            </div>
+            <div class="encoder-btn-row">
+              <button class="encoder-btn crypto-btn" data-action="aes-encrypt">
+                加密
+              </button>
+              <button class="encoder-btn crypto-btn" data-action="aes-decrypt">
+                解密
+              </button>
+              <button class="encoder-btn crypto-btn" data-action="hmac">
+                HMAC
+              </button>
+            </div>
+          </div>
+          <div class="encoder-output-group">
+            <textarea
+              id="encoderOutput"
+              class="encoder-textarea encoder-output"
+              readonly
+              placeholder="结果将显示在这里..."
+            ></textarea>
+            <button id="encoderCopy" class="encoder-copy-btn">复制结果</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弱口令生成页面 -->
+    <div class="page weakpass-page">
+      <div class="container">
+        <div class="weakpass-section">
+          <div class="weakpass-panel">
+            <div class="weakpass-grid">
+              <label class="weakpass-field">
+                <span>域名</span>
+                <input
+                  id="weakDomain"
+                  class="weakpass-input"
+                  type="text"
+                  placeholder="example.com / https://admin.example.com"
+                />
+              </label>
+              <label class="weakpass-field">
+                <span>年份范围</span>
+                <div class="weakpass-year-row">
+                  <input
+                    id="weakYearStart"
+                    class="weakpass-input"
+                    type="number"
+                    min="1900"
+                    max="2100"
+                    value="2010"
+                  />
+                  <input
+                    id="weakYearEnd"
+                    class="weakpass-input"
+                    type="number"
+                    min="1900"
+                    max="2100"
+                    value="2026"
+                  />
+                </div>
+              </label>
+            </div>
+            <label class="weakpass-field">
+              <span>用户键入</span>
+              <textarea
+                id="weakSeeds"
+                class="weakpass-textarea"
+                placeholder="每行一个基础词，如：&#10;admin&#10;lydx&#10;company"
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="weakpass-panel">
+            <div class="weakpass-library-head">
+              <div>
+                <div class="weakpass-library-title">常见厂商默认口令库</div>
+                <div id="weakPassPath" class="weakpass-library-path">
+                  使用插件内置 WeakPass.yaml
+                </div>
+              </div>
+              <button
+                id="chooseWeakPassFile"
+                class="weakpass-secondary-btn"
+                type="button"
+              >
+                绑定库文件
+              </button>
+            </div>
+            <div class="weakpass-search-row">
+              <input
+                id="weakPassQuery"
+                class="weakpass-input"
+                type="text"
+                placeholder="搜索厂商 / 产品 / 账号 / 密码"
+              />
+              <button
+                id="weakPassSearch"
+                class="weakpass-primary-btn"
+                type="button"
+              >
+                查询
+              </button>
+            </div>
+            <div id="weakPassResults" class="weakpass-library-results">
+              输入关键词后查询默认口令
+            </div>
+            <div class="weakpass-add-grid">
+              <input
+                id="weakPassVendor"
+                class="weakpass-input"
+                type="text"
+                placeholder="厂商或产品"
+              />
+              <input
+                id="weakPassUser"
+                class="weakpass-input"
+                type="text"
+                placeholder="账号，空账号填 <blank>"
+              />
+              <input
+                id="weakPassPassword"
+                class="weakpass-input"
+                type="text"
+                placeholder="密码，空密码填 <blank>"
+              />
+              <button
+                id="weakPassAdd"
+                class="weakpass-primary-btn"
+                type="button"
+              >
+                保存到库
+              </button>
+            </div>
+            <div id="weakPassStatus" class="weakpass-library-status"></div>
+          </div>
+
+          <div class="weakpass-panel">
+            <div class="weakpass-options">
+              <label
+                ><input type="checkbox" id="optYearLower" checked />
+                data@YYYY</label
+              >
+              <label
+                ><input type="checkbox" id="optYearCapital" checked />
+                Data@YYYY</label
+              >
+              <label
+                ><input type="checkbox" id="optSuffix" checked /> @后缀</label
+              >
+              <label
+                ><input type="checkbox" id="optMultiSep" checked /> # _ - . +
+                年份</label
+              >
+              <label
+                ><input type="checkbox" id="optNoSep" checked />
+                无分隔符后缀</label
+              >
+              <label
+                ><input type="checkbox" id="optAccountPrefix" checked />
+                账号@data</label
+              >
+              <label
+                ><input type="checkbox" id="optReverse" checked />
+                反转位置</label
+              >
+              <label
+                ><input type="checkbox" id="optEnterprise" checked />
+                企业后缀</label
+              >
+              <label
+                ><input type="checkbox" id="optUppercase" checked />
+                追加全大写</label
+              >
+            </div>
+          </div>
+
+          <details class="weakpass-details" open>
+            <summary>常见后缀列表</summary>
+            <textarea
+              id="weakCommonSuffixes"
+              class="weakpass-list-textarea"
+            ></textarea>
+          </details>
+          <details class="weakpass-details">
+            <summary>无分隔符后缀列表</summary>
+            <textarea
+              id="weakNoSepSuffixes"
+              class="weakpass-list-textarea"
+            ></textarea>
+          </details>
+          <details class="weakpass-details">
+            <summary>账号前缀列表</summary>
+            <textarea
+              id="weakAccountPrefixes"
+              class="weakpass-list-textarea"
+            ></textarea>
+          </details>
+          <details class="weakpass-details">
+            <summary>企业后缀列表</summary>
+            <textarea
+              id="weakEnterpriseSuffixes"
+              class="weakpass-list-textarea"
+            ></textarea>
+          </details>
+
+          <div class="weakpass-actions">
+            <button
+              id="weakGenerate"
+              class="weakpass-primary-btn"
+              type="button"
+            >
+              生成
+            </button>
+            <button id="weakCopy" class="weakpass-secondary-btn" type="button">
+              复制结果
+            </button>
+            <button id="weakClear" class="weakpass-secondary-btn" type="button">
+              清空
+            </button>
+            <span id="weakCount" class="weakpass-count">0 条</span>
+          </div>
+          <textarea
+            id="weakOutput"
+            class="weakpass-output"
+            readonly
+            placeholder="生成结果将显示在这里..."
+          ></textarea>
+        </div>
+
+        <!-- 暴力破解区域 -->
+        <div id="bruteforceContainer"></div>
+      </div>
+    </div>
+
+    <!-- URL工具页面 -->
+    <div class="page urltools-page">
+      <div class="container"></div>
+    </div>
+
+    <!-- 配置页面 -->
+    <div class="page config-page">
+      <div class="container">
+        <div class="config-section">
+          <div class="config-group">
+            <h3>扫描白名单</h3>
+            <div class="config-content">
+              以下域名网站（包括子域名）不会被扫描：
+            </div>
+            <textarea
+              id="whitelistInput"
+              placeholder="输入域名，每行一个，如：&#10;example.com&#10;test.org&#10;localhost"
+              rows="6"
+            ></textarea>
+            <div class="config-buttons">
+              <button id="saveWhitelist" class="save-btn">保存白名单</button>
+            </div>
+          </div>
+
+          <!-- 添加动态扫描控制 -->
+          <div class="config-group">
+            <h3>扫描设置</h3>
+            <div class="config-item">
+              <label class="switch-wrapper">
+                <input type="checkbox" id="dynamicScan" class="switch-input" />
+                <span class="switch-label">动态扫描</span>
+              </label>
+              <div class="config-desc">
+                启用后将自动扫描页面动态变化的内容，适用于单页应用等动态渲染的页面
+              </div>
+            </div>
+            <div class="config-item">
+              <label class="switch-wrapper">
+                <input type="checkbox" id="deepScan" class="switch-input" />
+                <span class="switch-label">深度扫描</span>
+              </label>
+              <div class="config-desc">
+                启用后将递归扫描JS文件中引用的其他JS文件，可能会增加扫描时间
+              </div>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <h3>威胁情报</h3>
+            <div class="config-content">
+              配置第三方威胁情报平台 API Key 和默认查询平台：
+            </div>
+            <input
+              type="password"
+              id="threatbookApiKey"
+              class="fp-input"
+              placeholder="ThreatBook API Key"
+              autocomplete="off"
+            />
+            <input
+              type="password"
+              id="virustotalApiKey"
+              class="fp-input ti-config-input"
+              placeholder="VirusTotal API Key"
+              autocomplete="off"
+            />
+            <div class="ti-config-platforms">
+              <label class="ti-toggle">
+                <input type="checkbox" id="configPlatformThreatbook" />
+                <span>默认查询微步</span>
+              </label>
+              <label class="ti-toggle">
+                <input type="checkbox" id="configPlatformVirustotal" />
+                <span>默认查询 VirusTotal</span>
+              </label>
+            </div>
+            <div class="config-buttons">
+              <button id="saveThreatIntelConfig" class="save-btn" type="button">
+                保存配置
+              </button>
+            </div>
+            <div id="threatIntelConfigStatus" class="fp-save-status"></div>
+          </div>
+
+          <!-- AI分析配置 -->
+          <div class="config-group">
+            <h3>AI安全分析</h3>
+            <div class="config-content">
+              配置OpenAI兼容API，用于信息搜集结果的智能安全分析：
+            </div>
+            <input
+              type="text"
+              id="aiEndpoint"
+              class="fp-input"
+              placeholder="API地址，如：https://api.openai.com"
+              autocomplete="off"
+            />
+            <input
+              type="password"
+              id="aiApiKey"
+              class="fp-input ti-config-input"
+              placeholder="API Key"
+              autocomplete="off"
+            />
+            <div class="ai-model-row">
+              <input
+                type="text"
+                id="aiModel"
+                class="fp-input ai-model-input"
+                placeholder="模型名，默认 gpt-4o-mini"
+                autocomplete="off"
+              />
+              <select id="aiModelSelect" class="fp-select ai-model-select">
+                <option value="">拉取模型列表...</option>
+              </select>
+            </div>
+            <div class="config-buttons">
+              <button id="aiVerifyBtn" class="save-btn" type="button">
+                验证连接
+              </button>
+              <button id="aiFetchModels" class="save-btn" type="button">
+                拉取模型
+              </button>
+              <button id="saveAiConfig" class="save-btn" type="button">
+                保存配置
+              </button>
+            </div>
+            <div id="aiConfigStatus" class="fp-save-status"></div>
+          </div>
+
+          <!-- 自定义指纹配置 -->
+          <div class="config-group">
+            <h3>自定义指纹</h3>
+            <div class="config-content">
+              参考 Finger24 的规则结构，直接写入本地 finger.json：
+            </div>
+            <div class="fp-file-row">
+              <div id="fingerJsonPath" class="fp-file-path">
+                未绑定 finger.json 文件
+              </div>
+              <div class="config-buttons">
+                <button id="chooseFingerJson" class="save-btn" type="button">
+                  选择 finger.json
+                </button>
+              </div>
+            </div>
+            <div class="custom-fp-form">
+              <input
+                type="text"
+                id="fpCmsInput"
+                placeholder="CMS名称，如：Dcat-Admin"
+                class="fp-input"
+              />
+              <div class="custom-fp-row">
+                <select id="fpMethodSelect" class="fp-select">
+                  <option value="keyword">关键词</option>
+                  <option value="faviconhash">Favicon哈希</option>
+                  <option value="active_keyword">主动探测</option>
+                </select>
+                <select id="fpLocationSelect" class="fp-select">
+                  <option value="body">页面内容</option>
+                  <option value="title">页面标题</option>
+                  <option value="header">HTTP头</option>
+                </select>
+              </div>
+              <div class="custom-fp-row">
+                <select id="fpTypeSelect" class="fp-select">
+                  <option value="其他">其他</option>
+                  <option value="framework">框架</option>
+                  <option value="technology">语言/技术</option>
+                  <option value="server">服务器</option>
+                  <option value="security">安全应用</option>
+                  <option value="panel">管理面板</option>
+                  <option value="cdn">CDN</option>
+                </select>
+                <label class="fp-important-toggle">
+                  <input type="checkbox" id="fpImportantInput" />
+                  <span>重要</span>
+                </label>
+              </div>
+              <div id="fpKeywordList" class="fp-keyword-list">
+                <div class="fp-keyword-item">
+                  <input
+                    type="text"
+                    class="fp-input fp-keyword-input"
+                    placeholder="关键词或哈希值"
+                  />
+                  <button type="button" class="fp-keyword-remove">-</button>
+                </div>
+              </div>
+              <div
+                id="fpProbeSection"
+                class="fp-probe-section"
+                style="display: none"
+              >
+                <div class="config-desc">
+                  主动探测路径：会基于当前站点发起请求，如 `/admin/login`
+                </div>
+                <div id="fpProbeList" class="fp-keyword-list">
+                  <div class="fp-keyword-item">
+                    <input
+                      type="text"
+                      class="fp-input fp-probe-input"
+                      placeholder="探测路径，如：/admin/login"
+                    />
+                    <button type="button" class="fp-probe-remove">-</button>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  id="fpStatusInput"
+                  class="fp-input"
+                  placeholder="可选状态码，如：200,302,403"
+                />
+              </div>
+            </div>
+            <div class="config-buttons">
+              <button id="addFpKeyword" class="save-btn" type="button">
+                添加关键词
+              </button>
+              <button
+                id="addFpProbe"
+                class="save-btn"
+                type="button"
+                style="display: none"
+              >
+                添加探测路径
+              </button>
+              <button id="addFpRule" class="save-btn" type="button">
+                保存到 finger.json
+              </button>
+            </div>
+            <div id="fpSaveStatus" class="fp-save-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="urltools.js"></script>
+    <script src="lib/tesseract.min.js"></script>
+    <script src="bruteforce.js"></script>
+    <script src="ai-analysis.js"></script>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

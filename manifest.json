@@ -1,0 +1,71 @@
+{
+  "manifest_version": 3,
+
+  "name": "烛照",
+  "version": "0.5.0",
+  "description": "以一烛之光，照见隐秘",
+
+  "icons": {
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "webRequest",
+    "cookies",
+    "tabs",
+    "webNavigation",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "offscreen"
+  ],
+
+  "host_permissions": [
+    "*://*/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "logo.png",
+      "32": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
+    },
+    "default_badge_text": "0",
+    "default_badge_background_color": "#666666"
+  },
+
+"web_accessible_resources": [{
+  "resources": [
+    "snow_x25.js",
+    "*.map",
+    "finger.json",
+    "finger24-headers.json",
+    "custom-fingerprints.json",
+    "active-fingerprints.json",
+    "lib/*",
+    "ocr.html"
+  ],
+  "matches": ["*://*/*"]
+}],
+"incognito":"split"
+}

@@ -1,0 +1,353 @@
+{
+  "description": "主动指纹探测库 - 发送指定URL请求，根据响应状态码或内容匹配关键词判断目标是否存在该指纹",
+  "version": "2.0.0",
+  "usage": {
+    "probe": "探测路径，会基于当前站点域名拼接为完整URL",
+    "keyword": "响应内容中必须包含的关键词（为空则仅检查状态码）",
+    "status": "期望的HTTP状态码（可选，为空则不检查状态码）",
+    "type": "指纹分类：panel/框架/technology/server/security/cms/OA/漏洞/信息泄露/其他"
+  },
+  "fingerprint": [
+    {
+      "cms": "Alibaba-Nacos",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["Nacos"],
+      "probe": ["/nacos/", "/api/nacos/"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Alibaba-Druid",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/druid/index.html"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "泛微-协同办公OA",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/wui/index.html"],
+      "status": [200],
+      "type": "OA"
+    },
+    {
+      "cms": "SpringBoot-Framework",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/error", "/gateway/error/", "/api/error/", "/env", "/actuator", "/jolokia/list"],
+      "status": [200],
+      "type": "框架"
+    },
+    {
+      "cms": "Swagger-UI",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["version"],
+      "probe": ["/v2/api-docs", "/v3/api-docs", "/swagger-ui.html", "/v1/swagger.json", "/v2/swagger.json", "/swagger-resources"],
+      "status": [200],
+      "type": "框架"
+    },
+    {
+      "cms": "帆软-FineReport",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/WebReport/ReportServer", "/ReportServer", "/webroot/decision/login"],
+      "status": [200],
+      "type": "OA"
+    },
+    {
+      "cms": "XXL-JOB",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["xxl-job-admin","JOB"],
+      "probe": ["/xxl-job-admin/toLogin", "/xxl-job/toLogin", "/xxl/toLogin"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "GeoServer",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/geoserver/web/"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "百度-UEditor",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/ueditor/ueditor.all.js", "/js/ueditor/ueditor.all.js", "/static/js/ueditor/ueditor.all.js", "/Content/ueditor/ueditor.all.js", "/ueditor-1.4.3.3/ueditor.all.js", "/ueditor1_4_3_3-utf8-net/ueditor.all.js"],
+      "status": [200],
+      "type": "框架"
+    },
+    {
+      "cms": "SMARTBI",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/smartbi/vision/index.jsp"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "MINIO-Browser",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/minio/"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Tomcat-Login",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/manager/html"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Jenkins",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/jenkins/login"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Zabbix",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/zabbix"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Apereo Cas",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/cas/login"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "Weblogic",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/console"],
+      "status": [200],
+      "type": "panel"
+    },
+    {
+      "cms": "万户OA",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/defaultroot/officeserverservlet"],
+      "status": [200],
+      "type": "OA"
+    },
+    {
+      "cms": "WebService",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/webservices/", "/services"],
+      "status": [200],
+      "type": "框架"
+    },
+    {
+      "cms": "博思电子票据",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/medical-web", "/medical-web/login.do"],
+      "status": [200],
+      "type": "OA"
+    },
+    {
+      "cms": "望海康信OES",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/OES/static/images/login-logo.png", "/OES/webroot", "/OES/webroot/decision/login"],
+      "status": [200],
+      "type": "OA"
+    },
+    {
+      "cms": "文件上传接口",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/file.asmx", "/file1.asmx", "/control/upload.ashx", "/control/upload.asmx", "/upload.ashx", "/uploadfile.ashx"],
+      "status": [200],
+      "type": "漏洞"
+    },
+    {
+      "cms": "源码泄露",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/bin.zip", "/bin.rar", "/1.zip", "/web.zip"],
+      "status": [200],
+      "type": "信息泄露"
+    },
+    {
+      "cms": "ThinkPHP日志泄露",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": [],
+      "probe": ["/runtime", "/runtime/"],
+      "status": [301],
+      "type": "信息泄露"
+    },
+    {
+      "cms": "ThinkPHP",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["thinkphp"],
+      "probe": ["/x"],
+      "status": [404,500],
+      "type": "框架"
+    },
+    {
+      "cms": "Spring Boot Actuator",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["UP"],
+      "probe": ["/actuator/health"],
+      "type": "框架"
+    },
+    {
+      "cms": "Druid Monitor",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["druid"],
+      "status":[200],
+      "probe": ["/druid/index.html", "/druid/login.html", "/druid/websession.json"],
+      "type": "panel"
+    },
+    {
+      "cms": "阿里云OSS",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["xml"],
+      "probe": ["/?list-type=2"],
+      "type": "其他"
+    },
+    {
+      "cms": "GitLab",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["gitlab"],
+      "probe": ["/api/v4/metadata", "/users/sign_in"],
+      "type": "panel"
+    },
+    {
+      "cms": "Grafana",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["grafana"],
+      "status":[200],
+      "probe": ["/api/health", "/login"],
+      "type": "panel"
+    },
+    {
+      "cms": "Kibana",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["kibana"],
+      "probe": ["/api/status", "/app/kibana"],
+      "status":[200],
+      "type": "panel"
+    },
+    {
+      "cms": "Prometheus",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["prometheus"],
+      "probe": ["/api/v1/status/config", "/graph"],
+      "type": "panel"
+    },
+    {
+      "cms": "RabbitMQ",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["rabbitmq"],
+      "probe": ["/api/overview", "/"],
+      "type": "panel"
+    },
+    {
+      "cms": "Elasticsearch",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["cluster_name", "elasticsearch"],
+      "probe": ["/_cluster/health", "/_cat/indices"],
+      "type": "panel"
+    },
+    {
+      "cms": "MinIO",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["minio"],
+      "status":[200],
+      "probe": ["/minio/health/live", "/minio/login"],
+      "type": "panel"
+    },
+    {
+      "cms": "若依 RuoYi",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["ruoyi", "若依"],
+      "probe": ["/login", "/"],
+      "type": "cms"
+    },
+    {
+      "cms": "Casdoor",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["casdoor"],
+      "probe": ["/api/get-account", "/login"],
+      "type": "panel"
+    },
+    {
+      "cms": "WebSphere",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["websphere", "ibm"],
+      "probe": ["/ibm/console/login.do"],
+      "type": "panel"
+    },
+    {
+      "cms": "ActiveMQ",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["activemq"],
+      "probe": ["/admin/", "/api/jolokia/read"],
+      "type": "panel"
+    },
+    {
+      "cms": "Solr",
+      "method": "active_keyword",
+      "location": "body",
+      "keyword": ["solr"],
+      "status":[200],
+      "probe": ["/solr/admin/cores?action=STATUS", "/solr/"],
+      "type": "panel"
+    }
+  ]
+}
