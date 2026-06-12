@@ -109,19 +109,30 @@ npm run dev
 npm run build
 ```
 
-## 🔧 验证码识别服务（可选）
+## 🔧 验证码识别（可选）
 
-爆破模块的验证码识别功能需要本地运行 Python 服务：
+爆破模块的验证码识别支持两种方式：
+
+### 方式一：ddddocr 本地服务（推荐）
 
 ```bash
-# 安装依赖
 pip3 install ddddocr
-
-# 启动服务
 python3 captcha_server.py
 ```
 
-服务默认监听 `http://127.0.0.1:19876`，仅在爆破含验证码的登录页面时需要。
+服务默认监听 `http://127.0.0.1:19876`。
+
+### 方式二：Tesseract OCR
+
+需要手动下载英文训练数据：
+
+```bash
+# 下载 eng.traineddata 放入 lib/ 目录
+curl -L -o lib/eng.traineddata \
+  https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
+```
+
+> `lib/eng.traineddata`（约 23MB）未包含在仓库中，需自行下载。
 
 ## 📁 项目结构
 
